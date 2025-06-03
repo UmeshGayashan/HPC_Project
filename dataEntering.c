@@ -91,8 +91,26 @@ int main(int argc, char **argv) {
     }
     rewind(fp);
 
+    // Extract table name from CSV filename
+    char *filename = strrchr(argv[1], '/');  // Get last part of the path
+    filename = filename ? filename + 1 : argv[1];  // Remove path if any
+
+    char table_name[256];
+    strncpy(table_name, filename, sizeof(table_name) - 1);
+    table_name[sizeof(table_name) - 1] = '\0';
+
+    // Remove file extension (e.g., ".csv")
+    char *dot = strrchr(table_name, '.');
+    if (dot) *dot = '\0';
+
+    // Convert to lowercase
+    for (int i = 0; table_name[i]; i++) {
+        table_name[i] = tolower(table_name[i]);
+    }
+
     // Generate CREATE TABLE
-    char create_sql[4096] = "CREATE TABLE IF NOT EXISTS reviews (";
+    char create_sql[4096];
+    snprintf(create_sql, sizeof(create_sql), "CREATE TABLE IF NOT EXISTS \"%s\" (", table_name);
     for (int i = 0; i < col_count; i++) {
         char *type = infer_type(samples[i], sample_rows);
         sprintf(create_sql + strlen(create_sql), "\"%s\" %s%s", 
