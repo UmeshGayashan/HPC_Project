@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libpq-fe.h>
+#include <time.h>          // For timing
 
 // Basic database search function
 PGresult* search_by_id(PGconn *conn, int search_id) {
@@ -27,8 +28,18 @@ int main() {
         return 1;
     }
 
-    int search_id = 524842;  // ID to search
+    int search_id = 518842;  // ID to search
+
+    // Start measuring time
+    clock_t start_time = clock();
+
     PGresult *result = search_by_id(conn, search_id);
+
+    // End measuring time
+    clock_t end_time = clock();
+    double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+
+    printf("Query execution time: %.6f seconds\n", time_taken);
     
     if (result) {
         int rows = PQntuples(result);
