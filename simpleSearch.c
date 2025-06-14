@@ -19,7 +19,15 @@ PGresult* search_by_id(PGconn *conn, int search_id) {
     return result;
 }
 
-int main() {
+int main(int argc, char **argv) {
+    // Check if the search ID is provided as an argument
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <search_id>\n", argv[0]);
+        return 1;
+    }
+
+    int search_id = atoi(argv[1]);  // Convert command line arg to int
+    
     PGconn *conn = PQconnectdb("host=localhost dbname=hpc_search user=postgres password=583864");
     
     if (PQstatus(conn) != CONNECTION_OK) {
@@ -27,8 +35,6 @@ int main() {
         PQfinish(conn);
         return 1;
     }
-
-    int search_id = 518842;  // ID to search
 
     // Start measuring time
     clock_t start_time = clock();
