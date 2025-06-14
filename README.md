@@ -17,3 +17,8 @@ gcc -o simpleSearch simpleSearch.c -I/usr/include/postgresql -lpq
 
 ./simpleSearch 254625
 
+### To do the parallel searching in PostgreSQL database
+
+gcc -fopenmp -o parallel_scan OpenMP/Parallelization.c  -I/usr/include/postgresql -lpq
+
+./parallel_scan 524844
