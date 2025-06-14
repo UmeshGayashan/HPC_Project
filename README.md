@@ -15,5 +15,5 @@ gcc -o dataEntering dataEntering.c -I/usr/include/postgresql -lpq
 
 gcc -o simpleSearch simpleSearch.c -I/usr/include/postgresql -lpq
 
-./simpleSearch
+./simpleSearch 254625
 
