@@ -4,9 +4,9 @@
 #include <time.h>          // For timing
 
 // Basic database search function
-PGresult* search_by_id(PGconn *conn, int search_id) {
+PGresult* search_by_id(PGconn *conn, const char *search_id) {
     char query[256];
-    snprintf(query, sizeof(query), "SELECT * FROM reviews WHERE \"Id\" = %d", search_id);
+    snprintf(query, sizeof(query), "SELECT * FROM reviews WHERE \"UserId\" = '%s'", search_id);
 
     PGresult *result = PQexec(conn, query);
     
@@ -20,14 +20,14 @@ PGresult* search_by_id(PGconn *conn, int search_id) {
 }
 
 int main(int argc, char **argv) {
-    // Check if the search ID is provided as an argument
+    // Check if the search UserId is provided as an argument
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <search_id>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <search_UserId>\n", argv[0]);
         return 1;
     }
 
-    int search_id = atoi(argv[1]);  // Convert command line arg to int
-    
+    char *search_id = argv[1];
+
     PGconn *conn = PQconnectdb("host=localhost dbname=hpc_search user=postgres password=583864");
     
     if (PQstatus(conn) != CONNECTION_OK) {
