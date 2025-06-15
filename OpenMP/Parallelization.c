@@ -8,7 +8,7 @@
 #define DB_CONN "host=localhost dbname=hpc_search user=postgres password=583864"
 #define THREAD_COUNT 6
 
-void search_value(int thread_id, int target_id, int offset, int limit) {
+void search_value(int thread_id, const char *search_userid, int offset, int limit) {
     PGconn *conn = PQconnectdb(DB_CONN);
     if (PQstatus(conn) != CONNECTION_OK) {
         fprintf(stderr, "Thread %d: Connection failed: %s\n", thread_id, PQerrorMessage(conn));
@@ -18,7 +18,7 @@ void search_value(int thread_id, int target_id, int offset, int limit) {
 
     char query[512];
     snprintf(query, sizeof(query),
-             "SELECT * FROM reviews ORDER BY \"Id\" OFFSET %d LIMIT %d", offset, limit);
+             "SELECT * FROM reviews ORDER BY \"UserId\" OFFSET %d LIMIT %d", offset, limit);
 
     PGresult *res = PQexec(conn, query);
 
@@ -31,9 +31,10 @@ void search_value(int thread_id, int target_id, int offset, int limit) {
 
     int rows = PQntuples(res);
     for (int i = 0; i < rows; i++) {
-        int id = atoi(PQgetvalue(res, i, 0));
-        if (id == target_id) {
-            printf("Thread %d: Found ID %d in offset %d\n", thread_id, target_id, offset);
+        const char *user_id = PQgetvalue(res, i, 2);
+        if (strcmp(user_id, search_userid) == 0){
+            printf("*****************************************\n");
+            printf("Thread %d: Found User ID %s in offset %d\n", thread_id, search_userid, offset);
             printf("ID: %s\n* ProductID: %s\n* UserID: %s\n* ProfileName: %s\n* HelpfulnessNumerator: %s\n* HelpfulnessDenominator: %s\n* Score: %s\n* Time: %s\n* Summary: %s\n* Text: %s\n",
                    PQgetvalue(res, i, 0),
                    PQgetvalue(res, i, 1),
@@ -81,7 +82,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    int target_id = atoi(argv[1]);
+    char *search_userid = argv[1];
     int total_rows = get_total_rows();
 
     if (total_rows == 0) {
@@ -89,9 +90,11 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    printf("Total rows: %d, Searching for ID: %d using %d threads\n", total_rows, target_id, THREAD_COUNT);
-
-    int rows_per_thread = (total_rows) / THREAD_COUNT;
+    printf("Total rows: %d, Searching for User ID: %s using %d threads\n", total_rows, search_userid, THREAD_COUNT);
+    
+    // (a / b)	Rounds down
+    // (a + b - 1) / b	Rounds up (ensures all data is used)
+    int rows_per_thread = (total_rows + THREAD_COUNT - 1) / THREAD_COUNT;
 
     double start_time = omp_get_wtime();
 
@@ -108,7 +111,7 @@ int main(int argc, char **argv) {
             limit = total_rows - offset;
         }
 
-        search_value(thread_id, target_id, offset, limit);
+        search_value(thread_id, search_userid, offset, limit);
     }
 
     double end_time = omp_get_wtime();
