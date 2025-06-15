@@ -91,8 +91,10 @@ int main(int argc, char **argv) {
     }
 
     printf("Total rows: %d, Searching for User ID: %s using %d threads\n", total_rows, search_userid, THREAD_COUNT);
-
-    int rows_per_thread = (total_rows) / THREAD_COUNT;
+    
+    // (a / b)	Rounds down
+    // (a + b - 1) / b	Rounds up (ensures all data is used)
+    int rows_per_thread = (total_rows + THREAD_COUNT - 1) / THREAD_COUNT;
 
     double start_time = omp_get_wtime();
 
