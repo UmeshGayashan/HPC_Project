@@ -8,6 +8,24 @@
 #define DB_CONN "host=localhost dbname=hpc_search user=postgres password=583864"
 #define THREAD_COUNT 6
 
+void process_result_row(PGresult *res, int row_num, int thread_id) {
+    printf("*****************************************\n");
+    printf("Thread %d: Found match at row %d\n", thread_id, row_num);
+    printf("ID: %s\n* ProductID: %s\n* UserID: %s\n* ProfileName: %s\n"
+           "* HelpfulnessNumerator: %s\n* HelpfulnessDenominator: %s\n"
+           "* Score: %s\n* Time: %s\n* Summary: %s\n* Text: %s\n",
+           PQgetvalue(res, row_num, 0),
+           PQgetvalue(res, row_num, 1),
+           PQgetvalue(res, row_num, 2),
+           PQgetvalue(res, row_num, 3),
+           PQgetvalue(res, row_num, 4),
+           PQgetvalue(res, row_num, 5),
+           PQgetvalue(res, row_num, 6),
+           PQgetvalue(res, row_num, 7),
+           PQgetvalue(res, row_num, 8),
+           PQgetvalue(res, row_num, 9));
+}
+
 void search_value(int thread_id, const char *search_userid, int offset, int limit) {
     PGconn *conn = PQconnectdb(DB_CONN);
     if (PQstatus(conn) != CONNECTION_OK) {
@@ -33,19 +51,20 @@ void search_value(int thread_id, const char *search_userid, int offset, int limi
     for (int i = 0; i < rows; i++) {
         const char *user_id = PQgetvalue(res, i, 2);
         if (strcmp(user_id, search_userid) == 0){
-            printf("*****************************************\n");
-            printf("Thread %d: Found User ID %s in offset %d\n", thread_id, search_userid, offset);
-            printf("ID: %s\n* ProductID: %s\n* UserID: %s\n* ProfileName: %s\n* HelpfulnessNumerator: %s\n* HelpfulnessDenominator: %s\n* Score: %s\n* Time: %s\n* Summary: %s\n* Text: %s\n",
-                   PQgetvalue(res, i, 0),
-                   PQgetvalue(res, i, 1),
-                   PQgetvalue(res, i, 2),
-                   PQgetvalue(res, i, 3),
-                   PQgetvalue(res, i, 4),
-                   PQgetvalue(res, i, 5),
-                   PQgetvalue(res, i, 6),
-                   PQgetvalue(res, i, 7),
-                   PQgetvalue(res, i, 8),
-                   PQgetvalue(res, i, 9));
+            process_result_row(res,i,thread_id);
+            // printf("*****************************************\n");
+            printf("\nThread %d: Found User ID %s in offset %d\n", thread_id, search_userid, offset);
+            // printf("ID: %s\n* ProductID: %s\n* UserID: %s\n* ProfileName: %s\n* HelpfulnessNumerator: %s\n* HelpfulnessDenominator: %s\n* Score: %s\n* Time: %s\n* Summary: %s\n* Text: %s\n",
+            //        PQgetvalue(res, i, 0),
+            //        PQgetvalue(res, i, 1),
+            //        PQgetvalue(res, i, 2),
+            //        PQgetvalue(res, i, 3),
+            //        PQgetvalue(res, i, 4),
+            //        PQgetvalue(res, i, 5),
+            //        PQgetvalue(res, i, 6),
+            //        PQgetvalue(res, i, 7),
+            //        PQgetvalue(res, i, 8),
+            //        PQgetvalue(res, i, 9));
         }
     }
 
