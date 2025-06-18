@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libpq-fe.h>
-#include <time.h>          // For timing
+#include <time.h> 
 
 // Basic database search function
 PGresult* search_by_id(PGconn *conn, const char *search_id) {
