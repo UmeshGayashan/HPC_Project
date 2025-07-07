@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libpq-fe.h>
-#include <time.h>          // For timing
+#include <time.h> 
 
 // Basic database search function
 PGresult* search_by_id(PGconn *conn, const char *search_id) {
@@ -11,7 +11,7 @@ PGresult* search_by_id(PGconn *conn, const char *search_id) {
     PGresult *result = PQexec(conn, query);
     
     if (PQresultStatus(result) != PGRES_TUPLES_OK) {
-        fprintf(stderr, "Query failed: %s", PQerrorMessage(conn));
+        fprintf(stderr, "Query failed: %s: %s", search_id, PQerrorMessage(conn));
         PQclear(result);
         return NULL;
     }
@@ -22,11 +22,9 @@ PGresult* search_by_id(PGconn *conn, const char *search_id) {
 int main(int argc, char **argv) {
     // Check if the search UserId is provided as an argument
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <search_UserId>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <search_UserIds>\n", argv[0]);
         return 1;
     }
-
-    char *search_id = argv[1];
 
     PGconn *conn = PQconnectdb("host=localhost dbname=hpc_search user=postgres password=583864");
     
@@ -39,7 +37,33 @@ int main(int argc, char **argv) {
     // Start measuring time
     clock_t start_time = clock();
 
-    PGresult *result = search_by_id(conn, search_id);
+    for (int i = 1; i < argc; i++) {
+        const char *search_id = argv[i];
+        printf("\nSearching for UserId: %s\n", search_id);
+
+        PGresult *result = search_by_id(conn, search_id);
+
+        if (result) {
+            int rows = PQntuples(result);
+            printf("Found %d records for UserId %s:\n", rows, search_id);
+
+            for (int j = 0; j < rows; j++) {
+                printf("ID: %s\n* ProductID: %s\n* UserID: %s\n* ProfileName: %s\n* HelpfulnessNumerator: %s\n* HelpfulnessDenominator: %s\n* Score: %s\n* Time: %s\n* Summary: %s\n* Text: %s\n\n",
+                       PQgetvalue(result, j, 0),
+                       PQgetvalue(result, j, 1),
+                       PQgetvalue(result, j, 2),
+                       PQgetvalue(result, j, 3),
+                       PQgetvalue(result, j, 4),
+                       PQgetvalue(result, j, 5),
+                       PQgetvalue(result, j, 6),
+                       PQgetvalue(result, j, 7),
+                       PQgetvalue(result, j, 8),
+                       PQgetvalue(result, j, 9));
+            }
+
+            PQclear(result);
+        }
+    }
 
     // End measuring time
     clock_t end_time = clock();
@@ -47,25 +71,6 @@ int main(int argc, char **argv) {
 
     printf("Query execution time: %.6f seconds\n", time_taken);
     
-    if (result) {
-        int rows = PQntuples(result);
-        printf("Found %d records:\n", rows);
-        
-        for(int i=0; i<rows; i++) {
-            printf("ID: %s\n* ProductID: %s\n* UserID: %s\n* ProfileName: %s\n* HelpfulnessNumerator: %s\n* HelpfulnessDenominator: %s\n* Score: %s\n* Time: %s\n* Summary: %s\n* Text: %s\n",
-                   PQgetvalue(result, i, 0),
-                   PQgetvalue(result, i, 1),
-                   PQgetvalue(result, i, 2),
-                   PQgetvalue(result, i, 3),
-                   PQgetvalue(result, i, 4),
-                   PQgetvalue(result, i, 5),
-                   PQgetvalue(result, i, 6),
-                   PQgetvalue(result, i, 7),
-                   PQgetvalue(result, i, 8),
-                   PQgetvalue(result, i, 9));
-        }
-        PQclear(result);
-    }
     
     PQfinish(conn);
     return 0;
