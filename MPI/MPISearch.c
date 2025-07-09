@@ -79,8 +79,16 @@ int main(int argc, char **argv) {
     }
 
     double end_time = MPI_Wtime();
-    printf("\nProcess %d: Execution time: %.6f seconds\n", rank, end_time - start_time);
 
+    // Compute total searching time across all processes
+    double global_start, global_end;
+    MPI_Reduce(&start_time, &global_start, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&end_time, &global_end, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+
+    // all processes and delivers the result only to the root process
+    if (rank == 0) {
+        printf("\nTotal searching time across all processes (using %d processes): %.6f seconds\n", size, global_end - global_start);
+    }
     MPI_Finalize();
     return 0;
 }
