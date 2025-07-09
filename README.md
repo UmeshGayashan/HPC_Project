@@ -22,3 +22,10 @@ gcc -o simpleSearch simpleSearch.c -I/usr/include/postgresql -lpq
 gcc -fopenmp -o parallel_scan OpenMP/Parallelization.c  -I/usr/include/postgresql -lpq
 
 ./parallel_scan "A395BORC6FGVXV" "A1MZYO9TZK0BBI"
+
+### To do the MPI parallel searching in PostgreSQL database
+
+mpicc -I/usr/include/postgresql -o mpi_search MPI/MPISearch.c -lpq
+
+mpirun -np 2 ./mpi_search "A395BORC6FGVXV" "A1MZYO9TZK0BBI"
+
