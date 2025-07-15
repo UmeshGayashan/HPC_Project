@@ -29,3 +29,8 @@ mpicc -I/usr/include/postgresql -o mpi_search MPI/MPISearch.c -lpq
 
 mpirun -np 2 ./mpi_search "A395BORC6FGVXV" "A1MZYO9TZK0BBI"
 
+### To do the Hybrid MPI+OpenMP parallel searching in PostgreSQL database
+
+mpicc -fopenmp -o hybrid_search Hybrid/HybridSearch.c -I/usr/include/postgresql -lpq
+
+mpirun -np 2 ./hybrid_search "A395BORC6FGVXV" "A1MZYO9TZK0BBI"
