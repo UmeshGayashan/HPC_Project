@@ -44,13 +44,13 @@ The serial implementation performs sequential UserID based searches on a Postgre
 
 This OpenMP based implementation performs parallel searching of multiple `UserId`s in a PostgreSQL database. It accepts `UserId`s as command line arguments and launches multiple threads using OpenMP, where each thread handles one search independently. Each thread establishes a separate database connection, executes a query, and prints the matching records along with its thread ID. Execution time is measured using `omp_get_wtime()` to evaluate performance.
 
-![OPenMPWorkFlow](./Assets/OPenMPWorkFlow.png)
+![OpenMPWorkFlow](./Assets/OpenMPWorkFlow.png)
 
 ## 2.1.3	MPI Version
 
 This MPI based implementation performs parallel search queries across multiple PostgreSQL database records using process level parallelism. It accepts `UserId`s as command line arguments and distributes them among MPI processes, where each process independently connects to the database and searches for one assigned `UserId`. Query results are printed along with the process rank. Execution time is measured using `MPI_Wtime()`, and global performance is evaluated by reducing start and end times across all processes.
 
-![MPIWorkFlow](./Assets/MPIWorkFlow.png)
+![MPIWorkflow](./Assets/MPIWorkflow.png)
 
 ## 2.1.4	Hybrid Version
 
