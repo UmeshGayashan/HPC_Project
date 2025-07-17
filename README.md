@@ -56,7 +56,7 @@ This MPI based implementation performs parallel search queries across multiple P
 
 This hybrid implementation combines MPI and OpenMP to perform parallel database searches across both processes and threads. MPI processes are assigned chunks of `UserId`s, which are further distributed among OpenMP threads within each process. Each thread establishes its own PostgreSQL connection, executes the query, and prints results alongside the process and thread identifiers. Execution time is measured using `MPI_Wtime()` and reduced across all ranks to assess total runtime.
 
-![HybridWorkFlow](./Assets/HybridWorkFlow.png)
+![HybridWorkflow](./Assets/HybridWorkflow.png)
 
 ---
 ## 3. Compilation & Execution
